@@ -1,4 +1,4 @@
-const fs = require('fs'); // Not needed, but core module if file ops; here for completeness
+const fs = require('fs');
 
 // Sample nutrition label text (simulating a meal's ingredient list)
 const labelText = `
@@ -10,7 +10,6 @@ May contain traces of onions and shallots.
 // Synonym dictionary: Expandable object where keys are base allergens, values are arrays of synonyms/variations
 const synonymDict = {
   onion: ['onion', 'shallot', 'scallion', 'leek', 'chive', 'onion powder', 'spring onion'],
-  // Add more, e.g., garlic: ['garlic', 'garlic powder', 'ail']
 };
 
 // Function: Basic regex matching (exact word, optional plural, case-insensitive)
