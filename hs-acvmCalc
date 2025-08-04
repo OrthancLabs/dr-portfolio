@@ -1,0 +1,77 @@
+exports.main = async (event, callback) => {
+  const hubspot = require('@hubspot/api-client');
+  const hubspotClient = new hubspot.Client({ accessToken: process.env.HUBSPOT_PRIVATE_APP_TOKEN });
+
+  let license_amount = 0;
+  let subscription_amount = 0;
+  let implementation_training_amount = 0;
+  const excludeSKUs = ['5000-0075', '8000-0010', '8000-0010-A', '8000-0010-B'];
+
+  try {
+    const searchRequest = {
+      filterGroups: [
+        {
+          filters: [
+            {
+              propertyName: 'associations.deal',
+              operator: 'EQ',
+              value: event.object.objectId
+            }
+          ]
+        }
+      ],
+      properties: ['hs_margin_acv', 'hs_sku', 'hs_product_id'],
+      limit: 100
+    };
+
+    const apiResponse = await hubspotClient.crm.lineItems.searchApi.doSearch(searchRequest);
+    const lineItems = apiResponse.results;
+
+    const productIds = [...new Set(lineItems.map(item => item.properties.hs_product_id).filter(id => id))];
+
+    let productMap = {};
+    if (productIds.length > 0) {
+      const batchInput = {
+        properties: ['hs_product_type'],
+        inputs: productIds.map(id => ({ id }))
+      };
+      const productResponse = await hubspotClient.crm.products.batchApi.read(batchInput);
+      productResponse.results.forEach(prod => {
+        productMap[prod.id] = prod.properties.hs_product_type || '';
+      });
+    }
+
+    for (const lineItem of lineItems) {
+      const properties = lineItem.properties;
+      const sku = properties.hs_sku || '';
+      if (excludeSKUs.includes(sku)) continue;
+
+      const productId = properties.hs_product_id;
+      const productType = productMap[productId] || '';
+      const acv_margin = parseFloat(properties.hs_margin_acv) || 0;
+
+      if (productType === 'License') {
+        license_amount += acv_margin;
+      } else if (productType === 'Subscription') {
+        subscription_amount += acv_margin;
+      } else if (productType === 'Implementation/Training') {
+        implementation_training_amount += acv_margin;
+      }
+    }
+
+    license_amount = Math.round(license_amount * 100) / 100;
+    subscription_amount = Math.round(subscription_amount * 100) / 100;
+    implementation_training_amount = Math.round(implementation_training_amount * 100) / 100;
+  } catch (error) {
+    console.error(error);
+    // Handle error if needed
+  }
+
+  callback({
+    outputFields: {
+      license_amount: license_amount,
+      subscription_amount: subscription_amount,
+      implementation_training_amount: implementation_training_amount
+    }
+  });
+};
