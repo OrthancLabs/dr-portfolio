@@ -1,39 +1,255 @@
-# dr-portfolio
+# Dominic Romito Portfolio
 
-Portfolio repo with sample scripts for client demos and workflow examples. This is a collection of standalone examples across Python, Node.js, HubSpot custom code, and Google Apps Script.
+A collection of production-inspired automation workflows and scripts demonstrating how to connect data, APIs, and business logic across systems. These examples focus on real operational use cases—eliminating manual work, structuring messy inputs, and delivering actionable outputs inside Google Workspace and adjacent systems.
 
-## Files
+---
 
-### Root Scripts
+## Patterns Demonstrated
 
-`bank-client-fraud-script`
+- Event-driven automation (onEdit, onFormSubmit, time triggers)
+- Cross-system integrations via APIs and webhooks
+- Email automation and mail merge workflows
+- Data validation, deduplication, and enrichment
+- Document generation (PDF reports via Drive)
+- Stateful workflows (tracking status across systems)
+- Lightweight ETL pipelines using Google Sheets as a data layer
+- Reusable component-based script design
 
-Sample Python script that loads mock transaction data, builds a few simple fraud signals, and asks OpenAI for a fraud decision with a short explanation.
+---
 
-`custom-hubspot-lambda-function`
+## Workflow Design Approach
 
-Sample HubSpot custom code action that looks up line items on a deal, groups ACV margin by product type, and returns totals back to HubSpot.
+1. Identify repetitive manual processes
+2. Define a system of record (typically Google Sheets)
+3. Automate intake (Forms, Gmail parsing, APIs)
+4. Apply validation and enrichment
+5. Trigger outputs (emails, reports, notifications)
+6. Structure for reuse across clients and workflows
 
-`allergy-matching`
+---
 
-Sample Node.js script that checks ingredient text for allergens using a synonym list, regex matching, and a simple fuzzy match fallback.
+## Projects
 
-### Google Apps Script Samples
+### fraud-detection-openai (Python)
 
-`gas-scripts/daily-sheet-summary.gs`
+**Use Case:**  
+Evaluate transaction data and flag potential fraud using lightweight heuristics and AI-assisted reasoning.
 
-Sample Apps Script that reads data from a Google Sheet, builds a summary, exports that summary as a PDF, and emails it on a daily trigger.
+**Inputs:**  
+Mock transaction dataset
 
-`gas-scripts/sheets-data-cleanup.gs`
+**Outputs:**  
+Fraud classification + explanation
 
-Sample Apps Script for Sheets that formats rows on edit, blocks duplicate entries, validates business rules, and enriches rows from a domain-based API lookup.
+**Tech:**  
+Python, OpenAI API
 
-`gas-scripts/gmail-mail-merge-tracker.gs`
+**Notes:**  
+Demonstrates combining deterministic signals with LLM reasoning for decision support.
 
-Sample Apps Script mail merge that reads recipients from a Google Sheet, sends personalized Gmail messages, and tracks sent and reply status back in the sheet.
+---
+
+### hubspot-margin-aggregation (Node / HubSpot)
+
+**Use Case:**  
+Aggregate deal margin by product type inside HubSpot workflows.
+
+**Trigger:**  
+HubSpot custom code action
+
+**Inputs:**  
+Deal + associated line items
+
+**Outputs:**  
+Margin totals written back to HubSpot
+
+**Tech:**  
+Node.js, HubSpot API
+
+---
+
+### ingredient-allergy-matcher (Node)
+
+**Use Case:**  
+Detect allergens in unstructured ingredient text.
+
+**Inputs:**  
+Free-text ingredient strings
+
+**Outputs:**  
+Matched allergens with fuzzy fallback
+
+**Tech:**  
+Node.js, regex, fuzzy matching
+
+**Notes:**  
+Demonstrates handling messy, real-world text inputs.
+
+---
+
+## Google Apps Script Workflows
+
+### daily-sheet-summary
+
+**Use Case:**  
+Automated daily reporting for operations teams
+
+**Trigger:**  
+Time-driven (daily)
+
+**Inputs:**  
+Google Sheet (operational data)
+
+**Outputs:**  
+PDF summary emailed to stakeholders
+
+**Services Used:**  
+Sheets, Drive, Gmail
+
+**Before:**  
+- Manual reporting  
+- No consistent daily visibility  
+
+**After:**  
+- Automated reporting pipeline  
+- Consistent, scheduled delivery  
+
+---
+
+### sheets-data-cleanup
+
+**Use Case:**  
+Real-time data validation and enrichment inside Sheets
+
+**Trigger:**  
+onEdit (event-driven)
+
+**Inputs:**  
+User-edited spreadsheet rows
+
+**Outputs:**  
+- Formatted rows  
+- Duplicate prevention  
+- Enriched data via API  
+
+**Services Used:**  
+Sheets, external API
+
+**Notes:**  
+Demonstrates enforcing business rules at the data entry layer.
+
+---
+
+### gmail-mail-merge-tracker
+
+**Use Case:**  
+Outbound communication + response tracking
+
+**Trigger:**  
+Manual / scheduled
+
+**Inputs:**  
+Recipient list in Google Sheets
+
+**Outputs:**  
+- Personalized Gmail messages  
+- Send + reply status tracked in Sheet  
+
+**Services Used:**  
+Gmail, Sheets
+
+**Notes:**  
+Shows stateful workflow design across communication systems.
+
+---
+
+### ops-order-intake-workflow
+
+**Use Case:**  
+Automate order intake from unstructured email into a structured system
+
+**Trigger:**  
+Gmail-based ingestion + time-driven processing
+
+**Inputs:**  
+Inbound emails with order details
+
+**Outputs:**  
+- Structured records in Google Sheets  
+- Daily ops summary email  
+
+**Services Used:**  
+Gmail, Sheets
+
+**Before:**  
+- Manual data entry from email  
+- Inconsistent formatting  
+- Limited visibility  
+
+**After:**  
+- Automated parsing and ingestion  
+- Standardized dataset  
+- Daily reporting  
+
+**Notes:**  
+Demonstrates transforming messy operational inputs into structured workflows.
+
+---
+
+### sheets-to-crm-sync
+
+**Use Case:**  
+Sync structured data from Google Sheets to external systems
+
+**Trigger:**  
+onEdit or scheduled sync
+
+**Inputs:**  
+New or updated rows in Sheets
+
+**Outputs:**  
+- Records pushed to external API (CRM or similar)  
+- Sync status logged in Sheet  
+
+**Services Used:**  
+Sheets, external API (via UrlFetchApp)
+
+**Notes:**  
+Includes basic retry handling and logging pattern.
+
+---
+
+## AppSheet (In Progress)
+
+### appsheet-field-ops-app
+
+**Use Case:**  
+Mobile-friendly tool for field teams to submit job updates
+
+**Features:**  
+- Form-based data entry  
+- Status tracking  
+- Photo uploads  
+- Sync to Google Sheets backend  
+
+**Purpose:**  
+Demonstrates extending Workspace workflows to non-technical end users.
+
+---
+
+## Reusable Components
+
+- Email templating + sender module
+- Sheet validation and deduplication logic
+- API client wrapper (fetch + logging + retries)
+- Config-based environment setup pattern
+- Reporting + PDF generation module
+
+---
 
 ## Notes
 
-- These scripts are intentionally simple and sample-grade.
-- Most scripts assume you will replace sample config values before using them.
-- The Google Apps Script samples are meant to be copied into an Apps Script project attached to a Sheet.
+- These workflows are intentionally lightweight but production-oriented
+- Designed to reflect real operational use cases, not isolated code samples
+- Most scripts are structured for reuse across multiple scenarios
+- Google Apps Script examples are intended to run inside a Sheet-bound project
