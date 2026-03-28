@@ -1,4 +1,4 @@
-# Dominic Romito Portfolio
+# DR Portfolio
 
 A collection of production-inspired automation workflows and scripts demonstrating how to connect data, APIs, and business logic across systems. These examples focus on real operational use cases—eliminating manual work, structuring messy inputs, and delivering actionable outputs inside Google Workspace and adjacent systems.
 
