@@ -2,8 +2,6 @@
 
 A collection of production-inspired automation workflows and scripts demonstrating how to connect data, APIs, and business logic across systems. These examples focus on real operational use cases—eliminating manual work, structuring messy inputs, and delivering actionable outputs inside Google Workspace and adjacent systems.
 
----
-
 ## Patterns Demonstrated
 
 - Event-driven automation (onEdit, onFormSubmit, time triggers)
@@ -15,8 +13,6 @@ A collection of production-inspired automation workflows and scripts demonstrati
 - Lightweight ETL pipelines using Google Sheets as a data layer
 - Reusable component-based script design
 
----
-
 ## Workflow Design Approach
 
 1. Identify repetitive manual processes
@@ -25,8 +21,6 @@ A collection of production-inspired automation workflows and scripts demonstrati
 4. Apply validation and enrichment
 5. Trigger outputs (emails, reports, notifications)
 6. Structure for reuse across clients and workflows
-
----
 
 ## Projects
 
@@ -47,8 +41,6 @@ Python, OpenAI API
 **Notes:**  
 Demonstrates combining deterministic signals with LLM reasoning for decision support.
 
----
-
 ### hubspot-margin-aggregation (Node / HubSpot)
 
 **Use Case:**  
@@ -66,8 +58,6 @@ Margin totals written back to HubSpot
 **Tech:**  
 Node.js, HubSpot API
 
----
-
 ### ingredient-allergy-matcher (Node)
 
 **Use Case:**  
@@ -84,8 +74,6 @@ Node.js, regex, fuzzy matching
 
 **Notes:**  
 Demonstrates handling messy, real-world text inputs.
-
----
 
 ## Google Apps Script Workflows
 
@@ -114,8 +102,6 @@ Sheets, Drive, Gmail
 - Automated reporting pipeline  
 - Consistent, scheduled delivery  
 
----
-
 ### sheets-data-cleanup
 
 **Use Case:**  
@@ -138,8 +124,6 @@ Sheets, external API
 **Notes:**  
 Demonstrates enforcing business rules at the data entry layer.
 
----
-
 ### gmail-mail-merge-tracker
 
 **Use Case:**  
@@ -160,8 +144,6 @@ Gmail, Sheets
 
 **Notes:**  
 Shows stateful workflow design across communication systems.
-
----
 
 ### ops-order-intake-workflow
 
@@ -194,8 +176,6 @@ Gmail, Sheets
 **Notes:**  
 Demonstrates transforming messy operational inputs into structured workflows.
 
----
-
 ### sheets-to-crm-sync
 
 **Use Case:**  
@@ -217,8 +197,6 @@ Sheets, external API (via UrlFetchApp)
 **Notes:**  
 Includes basic retry handling and logging pattern.
 
----
-
 ## AppSheet (In Progress)
 
 ### appsheet-field-ops-app
@@ -234,18 +212,6 @@ Mobile-friendly tool for field teams to submit job updates
 
 **Purpose:**  
 Demonstrates extending Workspace workflows to non-technical end users.
-
----
-
-## Reusable Components
-
-- Email templating + sender module
-- Sheet validation and deduplication logic
-- API client wrapper (fetch + logging + retries)
-- Config-based environment setup pattern
-- Reporting + PDF generation module
-
----
 
 ## Notes
 
