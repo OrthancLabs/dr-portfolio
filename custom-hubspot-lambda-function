@@ -1,13 +1,18 @@
+// HubSpot custom code action that totals ACV margin by product type for a deal.
 exports.main = async (event, callback) => {
   const hubspot = require('@hubspot/api-client');
   const hubspotClient = new hubspot.Client({ accessToken: process.env.HUBSPOT_PRIVATE_APP_TOKEN });
 
+  // Totals returned to the workflow.
   let license_amount = 0;
   let subscription_amount = 0;
   let implementation_training_amount = 0;
+
+  // SKUs to exclude from the rollup.
   const excludeSKUs = ['5000-0075', '8000-0010', '8000-0010-A', '8000-0010-B'];
 
   try {
+    // Get line items tied to the current deal.
     const searchRequest = {
       filterGroups: [
         {
@@ -27,6 +32,7 @@ exports.main = async (event, callback) => {
     const apiResponse = await hubspotClient.crm.lineItems.searchApi.doSearch(searchRequest);
     const lineItems = apiResponse.results;
 
+    // Look up product types in one batch call.
     const productIds = [...new Set(lineItems.map(item => item.properties.hs_product_id).filter(id => id))];
 
     let productMap = {};
@@ -41,6 +47,7 @@ exports.main = async (event, callback) => {
       });
     }
 
+    // Add each line item's ACV margin to the right bucket.
     for (const lineItem of lineItems) {
       const properties = lineItem.properties;
       const sku = properties.hs_sku || '';
@@ -59,14 +66,16 @@ exports.main = async (event, callback) => {
       }
     }
 
+    // Keep output values rounded.
     license_amount = Math.round(license_amount * 100) / 100;
     subscription_amount = Math.round(subscription_amount * 100) / 100;
     implementation_training_amount = Math.round(implementation_training_amount * 100) / 100;
   } catch (error) {
     console.error(error);
-    // Handle error if needed
+    // Fall back to zero values on error.
   }
 
+  // Return the totals to HubSpot.
   callback({
     outputFields: {
       license_amount: license_amount,

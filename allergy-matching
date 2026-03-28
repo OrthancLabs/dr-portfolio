@@ -1,24 +1,25 @@
+// Sample Node script that checks ingredient text for allergen matches using regex and fuzzy matching.
 const fs = require('fs');
 
-// Sample nutrition label text (simulating a meal's ingredient list)
+// Sample label text.
 const labelText = `
 Ingredients: Flour, milk, eggs, onion powder, garlic, soy sauce, peanuts, tree nuts.
 Contains: Wheat, dairy, soy.
 May contain traces of onions and shallots.
 `;
 
-// Synonym dictionary: Expandable object where keys are base allergens, values are arrays of synonyms/variations
+// Allergen synonyms.
 const synonymDict = {
   onion: ['onion', 'shallot', 'scallion', 'leek', 'chive', 'onion powder', 'spring onion'],
 };
 
-// Function: Basic regex matching (exact word, optional plural, case-insensitive)
+// Basic regex match.
 function regexMatch(text, term) {
   const pattern = new RegExp(`\\b${term}s?\\b`, 'gi');
   return pattern.test(text);
 }
 
-// Function: Levenshtein distance (simple implementation for fuzzy matching)
+// Simple Levenshtein distance.
 function levenshteinDistance(a, b) {
   const matrix = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0));
 
@@ -29,16 +30,16 @@ function levenshteinDistance(a, b) {
     for (let j = 1; j <= b.length; j++) {
       const cost = a[i - 1] === b[j - 1] ? 0 : 1;
       matrix[i][j] = Math.min(
-        matrix[i - 1][j] + 1,     // Deletion
-        matrix[i][j - 1] + 1,     // Insertion
-        matrix[i - 1][j - 1] + cost // Substitution
+        matrix[i - 1][j] + 1,
+        matrix[i][j - 1] + 1,
+        matrix[i - 1][j - 1] + cost
       );
     }
   }
   return matrix[a.length][b.length];
 }
 
-// Function: Fuzzy matching fallback using Levenshtein (threshold-based similarity)
+// Fuzzy match fallback.
 function fuzzyMatch(text, term, threshold = 0.85) {
   const words = text.toLowerCase().match(/\b\w+\b/g) || [];
   for (const word of words) {
@@ -52,9 +53,9 @@ function fuzzyMatch(text, term, threshold = 0.85) {
   return false;
 }
 
-// Redundant detection: Regex first (fast), then fuzzy if needed, checking base + synonyms
+// Try regex first, then fuzzy match.
 function detectAllergen(text, baseAllergen) {
-  const terms = synonymDict[baseAllergen] || [baseAllergen]; // Get synonyms or just base
+  const terms = synonymDict[baseAllergen] || [baseAllergen];
   for (const term of terms) {
     if (regexMatch(text, term)) {
       return true;
@@ -66,10 +67,10 @@ function detectAllergen(text, baseAllergen) {
   return false;
 }
 
-// Run detection for example allergens (keys from synonymDict)
+// Run the check for each allergen.
 const results = {};
 for (const baseAllergen in synonymDict) {
   results[baseAllergen] = detectAllergen(labelText, baseAllergen);
 }
 
-console.log(results);  // Output: { onion: true } (detects 'onion powder' via synonym, 'shallots' via fuzzy/regex)
+console.log(results);

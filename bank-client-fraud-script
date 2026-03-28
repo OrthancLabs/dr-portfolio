@@ -1,0 +1,165 @@
+#!/usr/bin/env python3
+
+"""
+Sample fraud review script that scores mock transactions with OpenAI.
+
+What this script does:
+1. Loads mock transaction data from an in-file sample list.
+2. Builds a few simple behavior flags for each transaction.
+3. Sends those details to OpenAI for a "fraud / not fraud" opinion.
+
+This is intentionally a demo script, not production fraud detection logic.
+"""
+
+import json
+import os
+from typing import Dict, List
+
+from openai import OpenAI
+
+
+# Sample data kept inline for the demo.
+SAMPLE_TRANSACTIONS: List[Dict] = [
+    {
+        "transaction_id": "TXN-1001",
+        "account_id": "ACCT-1",
+        "amount_usd": 42.15,
+        "merchant": "Neighborhood Cafe",
+        "merchant_category": "food",
+        "country": "US",
+        "customer_home_country": "US",
+        "hour_of_day": 9,
+        "transactions_last_24h": 2,
+        "card_present": True,
+        "known_merchant": True,
+    },
+    {
+        "transaction_id": "TXN-1002",
+        "account_id": "ACCT-2",
+        "amount_usd": 8420.00,
+        "merchant": "Wire Transfer Hub",
+        "merchant_category": "transfer",
+        "country": "SG",
+        "customer_home_country": "US",
+        "hour_of_day": 3,
+        "transactions_last_24h": 11,
+        "card_present": False,
+        "known_merchant": False,
+    },
+    {
+        "transaction_id": "TXN-1003",
+        "account_id": "ACCT-3",
+        "amount_usd": 1299.99,
+        "merchant": "Electronics Express",
+        "merchant_category": "electronics",
+        "country": "US",
+        "customer_home_country": "US",
+        "hour_of_day": 23,
+        "transactions_last_24h": 6,
+        "card_present": False,
+        "known_merchant": False,
+    },
+]
+
+
+def build_behavior_flags(transaction: Dict) -> List[str]:
+    """Build a few simple fraud signals."""
+    flags = []
+
+    if transaction["amount_usd"] >= 5000:
+        flags.append("high-dollar transaction")
+
+    if transaction["country"] != transaction["customer_home_country"]:
+        flags.append("cross-border activity")
+
+    if transaction["hour_of_day"] <= 5:
+        flags.append("occurred during unusual overnight hours")
+
+    if transaction["transactions_last_24h"] >= 5:
+        flags.append("elevated transaction velocity in the last 24 hours")
+
+    if not transaction["card_present"]:
+        flags.append("card-not-present transaction")
+
+    if not transaction["known_merchant"]:
+        flags.append("merchant is new for this customer")
+
+    if not flags:
+        flags.append("no strong risk indicators in this simplified sample")
+
+    return flags
+
+
+def build_prompt(transaction: Dict, flags: List[str]) -> str:
+    """Build the prompt for the model."""
+    return f"""
+You are reviewing a sample bank fraud scenario for a client demo.
+This is not a production decision engine.
+
+Transaction:
+{json.dumps(transaction, indent=2)}
+
+Behavior signals:
+{json.dumps(flags, indent=2)}
+
+Respond with valid JSON only using this shape:
+{{
+  "is_fraud": true or false,
+  "risk_level": "low" | "medium" | "high",
+  "reason": "short explanation",
+  "suggested_action": "short next step"
+}}
+
+Base the answer on the transaction behavior and keep the explanation concise.
+""".strip()
+
+
+def parse_json_response(raw_text: str) -> Dict:
+    """Parse the model response as JSON."""
+    cleaned = raw_text.strip()
+
+    if cleaned.startswith("```"):
+        cleaned = cleaned.strip("`")
+        cleaned = cleaned.replace("json", "", 1).strip()
+
+    return json.loads(cleaned)
+
+
+def detect_fraud(client: OpenAI, transaction: Dict) -> Dict:
+    """Get a fraud decision for one transaction."""
+    flags = build_behavior_flags(transaction)
+    prompt = build_prompt(transaction, flags)
+
+    response = client.responses.create(
+        model="gpt-5-mini",
+        input=prompt,
+    )
+
+    result = parse_json_response(response.output_text)
+    result["behavior_flags"] = flags
+    return result
+
+
+def main() -> None:
+    # Read the API key from the environment.
+    if not os.getenv("OPENAI_API_KEY"):
+        raise SystemExit("Missing OPENAI_API_KEY environment variable.")
+
+    client = OpenAI()
+
+    print("Running sample fraud review...\n")
+
+    for transaction in SAMPLE_TRANSACTIONS:
+        result = detect_fraud(client, transaction)
+
+        print(f"Transaction: {transaction['transaction_id']}")
+        print(f"Fraud: {result['is_fraud']}")
+        print(f"Risk: {result['risk_level']}")
+        print(f"Signals: {', '.join(result['behavior_flags'])}")
+        print(f"Reason: {result['reason']}")
+        print(f"Action: {result['suggested_action']}")
+        print("-" * 60)
+
+
+if __name__ == "__main__":
+    main()
