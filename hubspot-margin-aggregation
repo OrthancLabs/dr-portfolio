@@ -9,7 +9,7 @@ exports.main = async (event, callback) => {
   let implementation_training_amount = 0;
 
   // SKUs to exclude from the rollup.
-  const excludeSKUs = ['5000-0075', '8000-0010', '8000-0010-A', '8000-0010-B'];
+  const excludeSKUs = ['1111111', '2222222', '3333333', '4444444'];
 
   try {
     // Get line items tied to the current deal.
